@@ -9,7 +9,7 @@ import ssd1306
 #Adding the wifi credentials
 SSID = 'NTU FSD'
 PASS = ''
-BLYNK_AUTH = "4TDw3iXl2jgKpGKH9P5yP7Z9JoSEoMv8"
+BLYNK_AUTH = "JjQ_-rdjFVGDI9S6r_m3HBwDbgAJXzt6"
 
 print("Connecting to WiFi network...'{}'".format(SSID))
 wifi = network.WLAN(network.STA_IF)

@@ -1,4 +1,3 @@
-
 #RGB controling using Blynk cloude text input
 import BlynkLib as blynklib
 import network
