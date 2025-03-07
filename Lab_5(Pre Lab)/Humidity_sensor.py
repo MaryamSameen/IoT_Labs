@@ -1,33 +1,33 @@
 print("Hello, Maryam!")
 
+import network
+import BlynkLib
 from machine import Pin, I2C, Timer
 import machine
 import ssd1306
 import dht
 import time
-import network
-import Blynk
+
+
 
 # WiFi Credentials
-WIFI_SSID = "NTU FSD"
-WIFI_PASSWORD = ""
+WIFI_SSID = "NTU FSD"     
+WIFI_PASS = ""  
 
-# Blynk Auth Token
+# Blynk Auth Token 
 BLYNK_AUTH = "S9dY27-v1zEZafhOtsAPQm5la1obJNGA"
 
 # Connect to WiFi
-def connect_wifi():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(WIFI_SSID, WIFI_PASSWORD)
-    while not wlan.isconnected():
-        time.sleep(1)
-    print("Connected to WiFi")
-
-connect_wifi()
+wifi = network.WLAN(network.STA_IF)
+wifi.active(True)
+wifi.connect(WIFI_SSID, WIFI_PASS)
+while not wifi.isconnected():
+    pass
+print("Connected to WiFi")
 
 # Initialize Blynk
-blynk = Blynk(BLYNK_AUTH)
+blynk = BlynkLib.Blynk(BLYNK_AUTH)
+
 
 DHT_PIN = 4  # DHT11 data pin
 button = Pin(0, Pin.IN, Pin.PULL_UP)
@@ -79,7 +79,7 @@ while True:
         oled.fill(0)
         oled.text(f"Temp: {temp} C", 0, 0)
         oled.text(f"Humidity: {humidity}%", 0, 16)
-        oled.text(":-)", 28, 30)
+        oled.text(":-)", 28, 30) #Just smile (rona nahi)
         oled.show()
     
     except Exception as e:
@@ -87,3 +87,4 @@ while True:
 
     blynk.run()
     time.sleep(1)  # Update every second
+
