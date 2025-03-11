@@ -1,106 +1,170 @@
-print("Hello, Maryam!")
-
 import network
-import socket
 import time
-import machine
-from machine import Pin ,I2C
+import socket
+from machine import Pin, I2C
 from neopixel import NeoPixel
 import dht
-import ssd1306
-
-#oled display
-i2c = I2C(scl=Pin(9), sda=Pin(8))
-oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+import json
+from ssd1306 import SSD1306_I2C  # OLED display library
 
 
-def update_oled(message):
-    oled.fill(0)
-    oled.text(message, 0, 0)
-    oled.show()
+dht_pin = 4
+dht_sensor = dht.DHT11(Pin(dht_pin))
 
 
-DHT_PIN = 4  # DHT11 data pin
+pin = Pin(48, Pin.OUT)
+neo = NeoPixel(pin, 1)
 
-# Initialize DHT11 sensor
-dht_sensor = dht.DHT11(machine.Pin(DHT_PIN)) # change DHT11 fr physical device
+# OLED Display
+i2c = I2C(0, scl=Pin(9), sda=Pin(8))  # Use GPIO9 for SCL and GPIO8 for SDA
+oled = SSD1306_I2C(128, 64, i2c)  # Change to 128x32 if using a smaller display
+print("OLED initialized")
 
-#DHT Measure
+# WiFi credentials
+ssid_st = "NTU FSD"
+password_st = ""
 
-def  dht():
-    dht_sensor.measure()
-    time.sleep(0.2)
-    temp = dht_sensor.temperature()
-    humidity = dht_sensor.humidity()
-    return temp,humidity
-
-pin = Pin(48, Pin.OUT)   # set GPIO48  to output to drive NeoPixel
-neo = NeoPixel(pin, 1)   # create NeoPixel driver on GPIO48 for 1 pixel
-
-ssid_st = "The BadMans TP"
-password_st = "Sheesiop00"
-
+# Connect to WiFi
 print("Connecting to WiFi", end="")
 sta = network.WLAN(network.STA_IF)
 sta.active(True)
-sta.connect("The BadMans TP" , "Sheesiop00")
+sta.connect(ssid_st, password_st)
 
 # Wait for connection
 for _ in range(10):
     if sta.isconnected():
         break
     time.sleep(1)
-    
-    
+
 if sta.isconnected():
     print("Connected to WiFi!")
     print("IP Address as station:", sta.ifconfig()[0])
 else:
     print("Failed to connect")
-    
 
+# Access Point setup
+ssid_ap = "ESP_1354"
+password_ap = "12345678"
+auth_mode = network.AUTH_WPA2_PSK
 
-
-
-ssid_ap = "ESP32_AP"
-password_ap = "12345678"  # Minimum 8 characters
-auth_mode = network.AUTH_WPA2_PSK  # Secure mode (recommended)
-
-# Create an Access Point
 ap = network.WLAN(network.AP_IF)
-ap.active(True)  # Activate AP mode
-ap.config(essid=ssid_ap, password=password_ap, authmode=auth_mode)  # Set SSID and password
+ap.active(True)
+ap.config(essid=ssid_ap, password=password_ap, authmode=auth_mode)
 
 print("Access Point Active")
 print("AP IP Address:", ap.ifconfig()[0])
 
+# Function to read DHT sensor with error handling
+def read_dht_sensor():
+    try:
+        dht_sensor.measure()
+        temp = dht_sensor.temperature()
+        humidity = dht_sensor.humidity()
+        return temp, humidity
+    except Exception as e:
+        print("Failed to read DHT sensor:", e)
+        return None, None
 
-# Start Web Server
+def update_oled(message):
+    oled.fill(0)
+    oled.text(message, 0, 0)
+    oled.show()
+
+# Web server function
 def web_page():
-    temp, humidity = dht()
-    html = f"""<!DOCTYPE html>
-    <html>
+    html = """<!DOCTYPE html>
+<html>
 <head>
-    <title>ESP32 RGB LED Control</title>
+    <title>ESP32 OLED Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 20px;
+        }
+        h1 {
+            color: #007BFF;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        input[type="text"] {
+            padding: 8px;
+            width: 60%;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        input[type="submit"] {
+            padding: 8px 15px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        input[type="submit"]:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        function updateSensorData() {
+            fetch('/sensor')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('temp').innerText = data.temp;
+                    document.getElementById('humidity').innerText = data.humidity;
+                })
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
+
+        function sendText() {
+            const text = document.getElementById('textInput').value;
+            fetch('/display', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.text())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error sending text:', error));
+        }
+
+        setInterval(updateSensorData, 2000);
+    </script>
 </head>
-<body style="font-family: Arial, sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px;">
-    <h1 style="color: #333;">ESP32 RGB LED Control</h1>
-    <p><a href="/?RGB=red"><button style="background-color: red; color: white; padding: 10px 20px; border: none; font-size: 16px; cursor: pointer;">Turn RGB RED</button></a></p>
-    <p><a href="/?RGB=green"><button style="background-color: green; color: white; padding: 10px 20px; border: none; font-size: 16px; cursor: pointer;">Turn RGB GREEN</button></a></p>
-    <p><a href="/?RGB=blue"><button style="background-color: blue; color: white; padding: 10px 20px; border: none; font-size: 16px; cursor: pointer;">Turn RGB BLUE</button></a></p>
+<body>
+    <h1>ESP32 OLED Display</h1>
+    <p><a href="/?RGB=red"><button>Turn RGB RED</button></a></p>
+    <p><a href="/?RGB=green"><button>Turn RGB GREEN</button></a></p>
+    <p><a href="/?RGB=blue"><button>Turn RGB BLUE</button></a></p>
     <br>
-    <h1 style="color: #333;">Temperature and Humidity</h1>
-    <h2 style="color: #444;">Temp: {temp}&deg;C</h2>
-    <h2 style="color: #444;">Humidity: {humidity}%</h2>
+    <h1>TEMPERATURE AND HUMIDITY</h1>
+    <h2>Temp: <span id="temp">N/A</span>°C</h2>
+    <h2>Humidity: <span id="humidity">N/A</span>%</h2>
     <br>
-    <br>
-    <h2>Display on OLED</h2>
-    <form action="/"><input name="msg" type="text"><input type="submit" value="Send"></form>
+    <h1>OLED Display</h1>
+    <form action="/">
+        <input name="msg" type="text" placeholder="Enter text for OLED">
+        <input type="submit" value="Send">
+    </form>
 </body>
 </html>
-"""
+ """
     return html
 
+# Start web server
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind(("0.0.0.0", 80))
 s.listen(5)
@@ -112,21 +176,32 @@ while True:
     print("Request:", request)
     
     if "/?RGB=red" in request:
-        neo[0] = (255, 0, 0) # set the first pixel to red
-        neo.write()              # write data to all pixels
+        neo[0] = (255, 0, 0)  # set the first pixel to red
+        neo.write()            # write data to all pixels
     elif "/?RGB=green" in request:
-        neo[0] = (0, 255, 0) # set the first pixel to green
-        neo.write()              # write data to all pixels
+        neo[0] = (0, 255, 0)  # set the first pixel to green
+        neo.write()            # write data to all pixels
     elif "/?RGB=blue" in request:
-        neo[0] = (0, 0, 255) # set the first pixel to blue
-        neo.write()              # write data to all pixels
+        neo[0] = (0, 0, 255)  # set the first pixel to blue
+        neo.write()            # write data to all pixels
+    
     elif "msg=" in request:
         msg = request.split("msg=")[1].split(" ")[0].replace("+", " ")
-        print(msg)
-        update_oled(msg)    
-        
-    response = web_page()
-    conn.send("HTTP/1.1 200 OK\nContent-Type: text/html\n\n")
-    conn.send(response)
+        update_oled(msg)
+    
+    if request.startswith("GET /sensor "):
+        # Handle sensor data request
+        temp, humidity = read_dht_sensor()
+        if temp is None or humidity is None:
+            temp = "N/A"
+            humidity = "N/A"
+        sensor_data = {"temp": temp, "humidity": humidity}
+        conn.send("HTTP/1.1 200 OK\nContent-Type: application/json\n\n")
+        conn.send(json.dumps(sensor_data))
+    else:
+        # Serve the main webpage
+        response = web_page()
+        conn.send("HTTP/1.1 200 OK\nContent-Type: text/html\n\n")
+        conn.send(response)
+    
     conn.close()
-
