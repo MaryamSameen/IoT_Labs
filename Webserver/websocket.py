@@ -15,7 +15,7 @@ dht_sensor = dht.DHT11(Pin(dht_pin))
 pin = Pin(48, Pin.OUT)
 neo = NeoPixel(pin, 1)
 
-# OLED Display
+# OLED Disp
 i2c = I2C(0, scl=Pin(9), sda=Pin(8))  # Use GPIO9 for SCL and GPIO8 for SDA
 oled = SSD1306_I2C(128, 64, i2c)  # Change to 128x32 if using a smaller display
 print("OLED initialized")
