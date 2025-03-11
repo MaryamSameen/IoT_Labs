@@ -5,7 +5,7 @@ from machine import Pin, I2C
 from neopixel import NeoPixel
 import dht
 import json
-from ssd1306 import SSD1306_I2C  # OLED display library
+from ssd1306 import SSD1306_I2C  # OLED digity
 
 
 dht_pin = 4
