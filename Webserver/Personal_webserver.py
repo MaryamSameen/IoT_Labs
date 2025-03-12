@@ -312,8 +312,8 @@ def web_page():
         <!-- Content -->
         <div class="content">
             <h1>Weather Station</h1>
-            <h2>🌡️ Temperature: <span id="temp">N/A</span></h2>
-            <h2>💧 Humidity: <span id="humidity">N/A</span></h2>
+            <h2>🌡️ Temperature: <span id="temp">...</span></h2>
+            <h2>💧 Humidity: <span id="humidity">...</span></h2>
         </div>
 
         <!-- Alert Messages -->
