@@ -21,8 +21,8 @@ oled = SSD1306_I2C(128, 64, i2c)  # Change to 128x32 if using a smaller display
 print("OLED initialized")
 
 # WiFi credentials
-ssid_st = "NTU FSD"
-password_st = ""
+ssid_st = "The BadMans TP"
+password_st = "Sheesiop00"
 
 # Connect to WiFi
 print("Connecting to WiFi", end="")
@@ -128,8 +128,6 @@ def web_page():
         }
 
         /* Background Graphics */
-        
-
         .cloud {
             position: absolute;
             background: white;
@@ -205,11 +203,6 @@ def web_page():
             100% { transform: translateX(100vw); }
         }
 
-        @keyframes flyBirds {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100vw); }
-        }
-
         @keyframes glow {
             0% { box-shadow: 0 0 50px #FFD700; }
             100% { box-shadow: 0 0 70px #FFD700; }
@@ -249,6 +242,53 @@ def web_page():
         .input_rgb, .sensor-data, form {
             z-index: 3;
         }
+
+        /* Enhanced Button Styles */
+        .input_rgb input[type="submit"], form input[type="submit"] {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 1.2em;
+            transition: background 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        .input_rgb input[type="submit"]:hover, form input[type="submit"]:hover {
+            background: linear-gradient(135deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+        }
+
+        .input_rgb input[type="number"] {
+            padding: 10px;
+            width: 80px;
+            border-radius: 25px;
+            border: 2px solid #4CAF50;
+            background-color: rgba(46, 46, 74, 0.8);
+            color: #ffffff;
+            font-size: 1.1em;
+            margin-right: 10px;
+            transition: border-color 0.3s ease;
+        }
+        .input_rgb input[type="number"]:focus {
+            border-color: #ff6f61;
+        }
+
+        form input[type="text"] {
+            padding: 10px;
+            width: 250px;
+            border-radius: 25px;
+            border: 2px solid #4CAF50;
+            background-color: rgba(46, 46, 74, 0.8);
+            color: #ffffff;
+            font-size: 1.1em;
+            transition: border-color 0.3s ease;
+        }
+        form input[type="text"]:focus {
+            border-color: #ff6f61;
+        }
     </style>
     <script>
         function updateSensorData() {
@@ -261,10 +301,10 @@ def web_page():
                     // Change background based on temperature
                     const body = document.body;
                     const storm = document.querySelector('.storm');
-                    if (data.temp > 30) {
+                    if (data.temp > 27) {
                         body.className = 'summer';
                         storm.style.display = 'none';
-                    } else if (data.temp < 10) {
+                    } else if (data.temp < 25) {
                         body.className = 'winter';
                         storm.style.display = 'block';
                     } else {
@@ -293,10 +333,6 @@ def web_page():
 </head>
 <body class="spring">
     <!-- Background Graphics -->
-    <div class="home"></div>
-    <div class="kids"></div>
-    <div class="birds"></div>
-    <div class="flowers"></div>
     <div class="cloud one"></div>
     <div class="cloud two"></div>
     <div class="cloud three"></div>
@@ -321,8 +357,8 @@ def web_page():
     <br>
     <div class="sensor-data">
         <h1>🌡️ TEMPERATURE AND HUMIDITY 💧</h1>
-        <h2>Temp: <span id="temp">N/A</span></h2>
-        <h2>Humidity: <span id="humidity">N/A</span></h2>
+        <h2>Temp: <span id="temp">...</span></h2>
+        <h2>Humidity: <span id="humidity">...</span></h2>
     </div>
     <br>
     <h1>📺 OLED Display</h1>
@@ -387,8 +423,8 @@ while True:
         # Handle sensor data request
         temp, humidity = read_dht_sensor()
         if temp is None or humidity is None:
-            temp = "N/A"
-            humidity = "N/A"
+            temp = "..."
+            humidity = "..."
         sensor_data = {"temp": temp, "humidity": humidity}
         conn.send("HTTP/1.1 200 OK\nContent-Type: application/json\n\n")
         conn.send(json.dumps(sensor_data))
@@ -399,6 +435,7 @@ while True:
         conn.send(response)
     
     conn.close()
+
 
 
 
