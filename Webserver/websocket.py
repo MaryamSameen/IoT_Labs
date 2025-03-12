@@ -91,190 +91,247 @@ def decode_url_encoded_string(s):
 
 def web_page():
     html = """<!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>ESP32 OLED Display</title>
-        <style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #1e1e2f;
-                color: #ffffff;
-                margin: 0;
-                padding: 20px;
-                text-align: center;
-            }
-            h1 {
-                color: #ff6f61;
-                font-size: 2.5em;
-                margin-bottom: 20px;
-            }
-            h2 {
-                color: #a8e6cf;
-                font-size: 1.8em;
-                margin: 10px 0;
-            }
-            button {
-                background-color: #ff6f61;
-                color: white;
-                border: none;
-                padding: 15px 30px;
-                margin: 10px;
-                cursor: pointer;
-                border-radius: 25px;
-                font-size: 1.2em;
-                transition: background-color 0.3s ease;
-            }
-            button:hover {
-                background-color: #ff3b2f;
-            }
-            .rgb-buttons {
-                margin-top: 20px;
-            }
-            .rgb-buttons button {
-                background-color: #4CAF50;
-            }
-            .rgb-buttons button:nth-child(1) {
-                background-color: #ff6f61;
-            }
-            .rgb-buttons button:nth-child(2) {
-                background-color: #4CAF50;
-            }
-            .rgb-buttons button:nth-child(3) {
-                background-color: #008CBA;
-            }
-            .input_rgb {
-                background-color: #2e2e4a;
-                padding: 20px;
-                border-radius: 15px;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-                display: inline-block;
-                margin-top: 20px;
-            }
-            .input_rgb label {
-                font-size: 1.2em;
-                margin-right: 10px;
-            }
-            .input_rgb input[type="number"] {
-                padding: 10px;
-                width: 80px;
-                border-radius: 25px;
-                border: 2px solid #4CAF50;
-                background-color: #2e2e4a;
-                color: #ffffff;
-                font-size: 1.1em;
-                margin-right: 10px;
-            }
-            .input_rgb input[type="submit"] {
-                padding: 10px 20px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                font-size: 1.1em;
-                transition: background-color 0.3s ease;
-            }
-            .input_rgb input[type="submit"]:hover {
-                background-color: #45a049;
-            }
-            .sensor-data {
-                background-color: #2e2e4a;
-                padding: 20px;
-                border-radius: 15px;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-                display: inline-block;
-                margin-top: 20px;
-            }
-            .sensor-data h2 {
-                margin: 10px 0;
-            }
-            .emoji {
-                font-size: 1.5em;
-            }
-            form {
-                margin-top: 20px;
-            }
-            input[type="text"] {
-                padding: 10px;
-                width: 250px;
-                border-radius: 25px;
-                border: 2px solid #4CAF50;
-                background-color: #2e2e4a;
-                color: #ffffff;
-                font-size: 1.1em;
-            }
-            input[type="submit"] {
-                padding: 10px 20px;
-                background-color: #4CAF50;
-                color: white;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                font-size: 1.1em;
-                transition: background-color 0.3s ease;
-            }
-            input[type="submit"]:hover {
-                background-color: #45a049;
-            }
-        </style>
-        <script>
-            function updateSensorData() {
-                fetch('/sensor')
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('temp').innerText = data.temp + " °C 🌡️";
-                        document.getElementById('humidity').innerText = data.humidity + " % 💧";
-                    })
-                    .catch(error => console.error('Error fetching sensor data:', error));
-            }
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>ESP32 OLED Display</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+            transition: background 1s ease;
+        }
 
-            function sendText() {
-                const text = document.getElementById('textInput').value;
-                fetch('/display', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
+        /* Default Spring Background */
+        body.spring {
+            background: linear-gradient(135deg, #87CEEB, #1E90FF); /* Sky blue */
+        }
+
+        /* Summer Background (High Temperature) */
+        body.summer {
+            background: linear-gradient(135deg, #FFA500, #FF4500); /* Orange */
+        }
+
+        /* Winter Background (Low Temperature) */
+        body.winter {
+            background: linear-gradient(135deg, #2F4F4F, #1E1E2F); /* Dark gray */
+        }
+
+        /* Background Graphics */
+        
+
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 1000px;
+            animation: moveClouds 20s linear infinite;
+        }
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 1000px;
+        }
+        .cloud::before {
+            width: 80px;
+            height: 80px;
+            top: -40px;
+            left: 20px;
+        }
+        .cloud::after {
+            width: 60px;
+            height: 60px;
+            top: -30px;
+            right: 20px;
+        }
+        .cloud.one {
+            width: 150px;
+            height: 50px;
+            top: 10%;
+            left: -200px;
+            animation-duration: 25s;
+        }
+        .cloud.two {
+            width: 200px;
+            height: 70px;
+            top: 30%;
+            right: -200px;
+            animation-duration: 30s;
+        }
+        .cloud.three {
+            width: 180px;
+            height: 60px;
+            top: 50%;
+            left: -200px;
+            animation-duration: 35s;
+        }
+
+        .sun {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: #FFD700;
+            border-radius: 50%;
+            box-shadow: 0 0 50px #FFD700;
+            animation: glow 2s infinite alternate;
+            z-index: 2;
+        }
+
+        .storm {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            display: none;
+        }
+
+        @keyframes moveClouds {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+
+        @keyframes flyBirds {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100vw); }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 50px #FFD700; }
+            100% { box-shadow: 0 0 70px #FFD700; }
+        }
+
+        h1 {
+            color: #ff6f61;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 3;
+        }
+        h2 {
+            color: #a8e6cf;
+            font-size: 1.8em;
+            margin: 10px 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            z-index: 3;
+        }
+        button {
+            background-color: #ff6f61;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 25px;
+            font-size: 1.2em;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            z-index: 3;
+        }
+        button:hover {
+            background-color: #ff3b2f;
+            transform: translateY(-2px);
+        }
+        .input_rgb, .sensor-data, form {
+            z-index: 3;
+        }
+    </style>
+    <script>
+        function updateSensorData() {
+            fetch('/sensor')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('temp').innerText = data.temp + " °C 🌡️";
+                    document.getElementById('humidity').innerText = data.humidity + " % 💧";
+
+                    // Change background based on temperature
+                    const body = document.body;
+                    const storm = document.querySelector('.storm');
+                    if (data.temp > 30) {
+                        body.className = 'summer';
+                        storm.style.display = 'none';
+                    } else if (data.temp < 10) {
+                        body.className = 'winter';
+                        storm.style.display = 'block';
+                    } else {
+                        body.className = 'spring';
+                        storm.style.display = 'none';
+                    }
                 })
-                .then(response => response.text())
-                .then(data => console.log(data))
-                .catch(error => console.error('Error sending text:', error));
-            }
+                .catch(error => console.error('Error fetching sensor data:', error));
+        }
 
-            // Update sensor data every 2 seconds
-            setInterval(updateSensorData, 2000);
-        </script>
-    </head>
-    <body>
-        <h1>ESP32 OLED Display</h1>
-        <div class="rgb-buttons">
-            <a href="/?RGB=red"><button>🔴 Turn RGB RED</button></a>
-            <a href="/?RGB=green"><button>🟢 Turn RGB GREEN</button></a>
-            <a href="/?RGB=blue"><button>🔵 Turn RGB BLUE</button></a>
-        </div>
-        <div class="input_rgb">
-            <h2>RGB LED Control</h2>
-            <form action="/" method="GET">
-                <label>R:</label> <input type="number" name="R" min="0" max="255" value="0">
-                <label>G:</label> <input type="number" name="G" min="0" max="255" value="0">
-                <label>B:</label> <input type="number" name="B" min="0" max="255" value="0">
-                <input type="submit" value="Set Color">
-            </form>
-        </div>
-        <br>
-        <div class="sensor-data">
-            <h1>🌡️ TEMPERATURE AND HUMIDITY 💧</h1>
-            <h2>Temp: <span id="temp">N/A</span></h2>
-            <h2>Humidity: <span id="humidity">N/A</span></h2>
-        </div>
-        <br>
-        <h1>📺 OLED Display</h1>
-        <form action="/">
-            <input name="msg" id="textInput" type="text" placeholder="Enter text to display...">
-            <input type="submit" value="Send ✔">
+        function sendText() {
+            const text = document.getElementById('textInput').value;
+            fetch('/display', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.text())
+            .then(data => console.log(data))
+            .catch(error => console.error('Error sending text:', error));
+        }
+
+        // Update sensor data every 2 seconds
+        setInterval(updateSensorData, 2000);
+    </script>
+</head>
+<body class="spring">
+    <!-- Background Graphics -->
+    <div class="home"></div>
+    <div class="kids"></div>
+    <div class="birds"></div>
+    <div class="flowers"></div>
+    <div class="cloud one"></div>
+    <div class="cloud two"></div>
+    <div class="cloud three"></div>
+    <div class="sun"></div>
+    <div class="storm"></div>
+
+    <h1>ESP32 OLED Display</h1>
+    <div class="rgb-buttons">
+        <a href="/?RGB=red"><button>🔴 Turn RGB RED</button></a>
+        <a href="/?RGB=green"><button>🟢 Turn RGB GREEN</button></a>
+        <a href="/?RGB=blue"><button>🔵 Turn RGB BLUE</button></a>
+    </div>
+    <div class="input_rgb">
+        <h2>RGB LED Control</h2>
+        <form action="/" method="GET">
+            <label>R:</label> <input type="number" name="R" min="0" max="255" value="0">
+            <label>G:</label> <input type="number" name="G" min="0" max="255" value="0">
+            <label>B:</label> <input type="number" name="B" min="0" max="255" value="0">
+            <input type="submit" value="Set Color">
         </form>
-    </body>
-    </html>"""
+    </div>
+    <br>
+    <div class="sensor-data">
+        <h1>🌡️ TEMPERATURE AND HUMIDITY 💧</h1>
+        <h2>Temp: <span id="temp">N/A</span></h2>
+        <h2>Humidity: <span id="humidity">N/A</span></h2>
+    </div>
+    <br>
+    <h1>📺 OLED Display</h1>
+    <form action="/">
+        <input name="msg" id="textInput" type="text" placeholder="Enter text to display...">
+        <input type="submit" value="Send ✔">
+    </form>
+</body>
+</html>"""
     return html
 
 # Start web server
@@ -342,5 +399,7 @@ while True:
         conn.send(response)
     
     conn.close()
+
+
 
 
