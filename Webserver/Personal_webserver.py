@@ -407,11 +407,11 @@ while True:
         temp_alert = ""
         humidity_alert = ""
         if temp < 25:
-            temp_alert = "Low Temperature! ❄️"
+            temp_alert = "Low Temperature! ️"
         elif 25 <= temp <= 26:
-            temp_alert = "Normal Temperature! 😊"
+            temp_alert = "Normal Temperature! "
         elif temp >= 27:
-            temp_alert = "High Temperature! 🔥"
+            temp_alert = "High Temperature! "
             blink_led((255, 0, 0))  # Blink red LED for high temperature
 
         if humidity < 50:
