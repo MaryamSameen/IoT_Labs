@@ -1,0 +1,97 @@
+# RGB Control & Weather Station with Alerts - ESP32 Project
+
+## Overview
+This project consists of two main tasks implemented using an ESP32 microcontroller. The first task focuses on creating a web server for RGB LED control and sensor data visualization. The second task extends this functionality into a weather station with real-time alerts based on temperature and humidity.
+
+## Task 1: Basic Webserver for RGB Control and Sensor Data
+
+### Features
+- **RGB Control:**
+  - Buttons to turn the RGB LED red, green, or blue.
+  - Input fields to set custom RGB values.
+- **Temperature and Humidity Display:**
+  - Real-time data from the DHT11 sensor.
+- **OLED Display Control:**
+  - A text input field to send custom messages to the OLED display.
+- **Styling:**
+  - CSS is used to create a visually appealing interface with dynamic background changes based on temperature.
+
+### Code Overview
+- **WiFi Setup:** ESP32 connects to a WiFi network in STA mode and also creates an AP.
+- **DHT11 Sensor:** Reads temperature and humidity data.
+- **NeoPixel Control:** Controls the RGB LED based on user input.
+- **OLED Display:** Updates the OLED with custom messages.
+- **Web Server:** Handles HTTP requests and serves the web page.
+
+### Challenges Faced
+- **OLED Display Issues:** Initially, the OLED did not display messages correctly. Kanza fixed this by debugging the I2C communication and ensuring proper text rendering.
+- **DHT11 Sensor Errors:** The sensor occasionally failed to read data. Maryam resolved this by adding error handling and retry logic.
+
+---
+
+## Task 2: Weather Station with Alerts
+
+### Features
+- **Temperature Alerts:**
+  - High Temperature (>26°C): Displays a "🔥 Hot Temperature!" alert and blinks the RGB LED red.
+  - Normal Temperature (25-26°C): Displays "🌤️ Normal Temperature!"
+  - Low Temperature (<25°C): Displays "❄️ Cold Temperature!" and changes the background to a winter theme.
+- **Humidity Alerts:**
+  - High Humidity (≥70%): Displays "High Humidity!"
+  - Normal Humidity (50-70%): Displays "Normal Humidity!"
+  - Low Humidity (<50%): Displays "Dry!"
+- **OLED Updates:**
+  - Shows temperature, humidity, and alerts on the OLED display.
+- **Dynamic Backgrounds:**
+  - The web page background changes based on temperature (day, hot, night).
+
+### Code Overview
+- **Dynamic Backgrounds:** CSS transitions and JavaScript dynamically update the background.
+- **Alerts:** Displays temperature and humidity alerts on both the web page and OLED.
+
+### Challenges Faced
+- **Background Transition:** Initially, transitions were not smooth. This was fixed by using CSS transitions and JavaScript.
+- **Alert Timing:** Alerts disappeared too quickly. Timing was adjusted to ensure users could read them properly.
+
+---
+
+## Contributions
+- **Hassaan:**
+  - Created the basic AP-STA mode template.
+  - Implemented RGB control with user input.
+  - Assisted with HTML and CSS design.
+- **Kanza:**
+  - Fixed OLED display issues.
+  - Implemented custom message display on the OLED.
+  - Contributed to the weather station design.
+- **Maryam:**
+  - Integrated and fixed DHT11 sensor functionality.
+  - Implemented temperature and humidity alerts.
+  - Assisted with HTML and CSS design.
+
+---
+
+## Weather Station Interface for Task 2
+- Dynamic background changes (day, hot, night).
+- Temperature and humidity alerts.
+- OLED display showing sensor data and alerts.
+
+### How to Use
+1. **Set Up ESP32:** Flash the provided code onto the ESP32.
+2. **Connect to WiFi:** The ESP32 will connect to a WiFi network and host a web server.
+3. **Access the Web Interface:** Open the web interface to control RGB LEDs, monitor temperature and humidity, and send messages to the OLED.
+4. **Monitor Alerts:** The system provides real-time alerts and dynamic visuals based on sensor readings.
+
+---
+
+## Future Improvements
+- Integrate a database to store historical sensor data.
+- Add more alert customization options.
+- Improve UI/UX with additional animations and effects.
+
+---
+
+## License
+This project is open-source and free to use for educational purposes.
+
+---
