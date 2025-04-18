@@ -13,3 +13,5 @@ We are doing calculations on Thingspeak cloud and ESP32 will do its work as calc
 In thing2.py give your own read,write API, edit your channel ID in the url.
 It will show alert in Cloud on High Temperature.
 Added visalization Correlation graph on dashboard.
+
+Error: Correlation Graph error not showing value on my dashboard
