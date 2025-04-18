@@ -11,3 +11,5 @@ Created a React, Alert for High Temperature in ThingsSpeak Cloud and added MATLA
 We are doing calculations on Thingspeak cloud and ESP32 will do its work as calculations will be done on cloud.
 
 In thing2.py give your own read,write API, edit your channel ID in the url.
+It will show alert in Cloud on High Temperature.
+Added visalization Correlation graph on dashboard.
