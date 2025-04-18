@@ -7,3 +7,7 @@ CheckInterval = 20 is because we are using cloud for Free that doesn't allow us 
 ### Task 2:
 
 Free Thingspeak can't give Text Alert but we can deal with Numeric Value Alerts.
+Created a React, Alert for High Temperature in ThingsSpeak Cloud and added MATLAB Analysis code.
+We are doing calculations on Thingspeak cloud and ESP32 will do its work as calculations will be done on cloud.
+
+In thing2.py give your own read,write API, edit your channel ID in the url.
