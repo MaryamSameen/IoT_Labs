@@ -1,11 +1,11 @@
 import machine
 import dht
 import time
-import network
-import ujson
-from machine import Pin, SoftI2C
+import _thread
+from machine import Pin, SoftI2C, RTC
 import ssd1306
 from umqtt.simple import MQTTClient
+import network
 
 WIFI_SSID = 'NTU FSD'
 WIFI_PASS = ''
@@ -28,7 +28,7 @@ if wifi.isconnected():
 else:
     print('Failed to connect to WiFi. Check credentials or network.')
 
-# Configuration
+# ==== Config ====
 THINGSPEAK_MQTT_HOST = "mqtt3.thingspeak.com"
 THINGSPEAK_MQTT_PORT = 1883
 THINGSPEAK_CHANNEL_ID = "2924699"
@@ -38,47 +38,20 @@ THINGSPEAK_MQTT_API_KEY = "bddSQcwfriMerUIOh4JXzFXl"
 
 DHT_PIN = 4
 CHECK_INTERVAL = 20
-
-# MQTT topic format: channels/<channel_id>/publish
 MQTT_TOPIC = f"channels/{THINGSPEAK_CHANNEL_ID}/publish"
 
-# Initialize hardware
+# ==== Global Variables ====
+temp, humidity = 0, 0
+oled_lock = _thread.allocate_lock()
+
+# ==== Hardware Init ====
 dht_sensor = dht.DHT11(Pin(DHT_PIN))
 i2c = SoftI2C(scl=Pin(9), sda=Pin(8))
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
-def read_sensor():
-    try:
-        dht_sensor.measure()
-        temp = dht_sensor.temperature()
-        humidity = dht_sensor.humidity()
-        return temp, humidity
-    except Exception as e:
-        print("Sensor read error:", e)
-        return None, None
-
-def send_to_thingspeak_mqtt(client, temp, humidity):
-    try:
-        payload = f"field1={temp}&field2={humidity}"
-        client.publish(MQTT_TOPIC, payload)
-        print("Published to ThingSpeak via MQTT:", payload)
-        return True
-    except Exception as e:
-        print("MQTT send error:", e)
-        try:
-            client.connect()  # try reconnecting
-            print("Reconnected to MQTT broker.")
-        except Exception as e2:
-            print("Reconnection failed:", e2)
-        return False
 
 
-def display_status(temp, humidity):
-    oled.fill(0)
-    oled.text(f"Temp: {temp:.1f}C", 0, 0)
-    oled.text(f"Humid: {humidity:.1f}%", 0, 16)
-    oled.show()
-
+# ==== MQTT Setup ====
 def connect_mqtt():
     try:
         client = MQTTClient(client_id=THINGSPEAK_CLIENT_ID,
@@ -93,33 +66,64 @@ def connect_mqtt():
         print("MQTT connection error:", e)
         return None
 
-def main():
-    oled.fill(0)
-    oled.text("IoT Monitor", 0, 0)
-    oled.text("Booting...", 0, 16)
-    oled.show()
-    print("IoT Monitoring...")
-    print("Booting...")
-
+# ==== Sensor Task (Core 0) ====
+def sensor_task():
+    global temp, humidity
     client = connect_mqtt()
     if not client:
-        print("Failed to connect to MQTT broker. Rebooting...")
         machine.reset()
 
     while True:
-        temp, humidity = read_sensor()
-        if temp is None or humidity is None:
-            print("Failed to read sensor data. Retrying...")
+        try:
+            dht_sensor.measure()
+            temp = dht_sensor.temperature()
+            humidity = dht_sensor.humidity()
+        except Exception as e:
+            print("Sensor read error:", e)
             time.sleep(2)
             continue
 
-        send_success = send_to_thingspeak_mqtt(client, temp, humidity)
-        display_status(temp, humidity)
-        print(temp, humidity)
+        try:
+            payload = f"field1={temp}&field2={humidity}"
+            client.publish(MQTT_TOPIC, payload)
+            print("MQTT Publish:", payload)
+        except Exception as e:
+            print("MQTT send error:", e)
+            try:
+                client.connect()
+                client.publish(MQTT_TOPIC, payload)
+                print("Re-published after reconnect.")
+            except:
+                print("Re-publish failed.")
 
-        print(f"Waiting {CHECK_INTERVAL} seconds")
         time.sleep(CHECK_INTERVAL)
+
+# ==== OLED Task (Core 1) ====
+def oled_task():
+    global temp, humidity
+    while True:
+        oled_lock.acquire()
+        oled.fill(0)
+        oled.text("IoT Monitor", 0, 0)
+        oled.text("Temp: {:.1f}C".format(temp), 0, 16)
+        oled.text("Hum: {:.1f}%".format(humidity), 0, 32)
+        oled.show()
+        oled_lock.release()
+        time.sleep(1)
+
+# ==== Main Entry ====
+def main():
+    oled.fill(0)
+    oled.text("Booting...", 0, 0)
+    oled.show()
+    print("Booting...")
+
+    
+    print("Starting OLED thread on core 1...")
+    _thread.start_new_thread(oled_task, ())
+
+    print("Starting sensor loop on core 0...")
+    sensor_task()  # This stays on main thread
 
 if __name__ == "__main__":
     main()
-
