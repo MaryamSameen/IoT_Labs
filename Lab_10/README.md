@@ -26,3 +26,7 @@ Then create payload(what you want to publish).
 Client.public -> builtin function which has one parameter of Topic and second and second payload.
  main thread run on core 0.
  other generated thread on core 1.
+
+ ### Task 3:
+
+ 
