@@ -29,4 +29,7 @@ Client.public -> builtin function which has one parameter of Topic and second an
 
  ### Task 3:
 
+ Tried to subscribe data through publisher but thingSpeak doesn't allow because of Ussl protocols.
+ error encountered were. MQTT connect failed: 4 , MQTT connect failed: 128 , MQTT connect failed: -202
  
+
