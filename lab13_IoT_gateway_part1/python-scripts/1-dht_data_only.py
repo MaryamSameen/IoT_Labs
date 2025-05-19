@@ -6,12 +6,12 @@ import time
 
 # InfluxDB setup
 INFLUXDB_URL = "http://localhost:8086"  # InfluxDB server URL
-INFLUXDB_TOKEN = "g0tv0xAdq5YbxZ7fPNSHkQ9pmRq1H6w9T7Ek22VAPLr2ATVQCquAhDvEwvnLOpFwJkBkDA-BmDz8GlJMLEkxXg=="  # Replace with your InfluxDB token
-INFLUXDB_ORG = "NTU_IoT"      # Replace with your InfluxDB organization name
-INFLUXDB_BUCKET = "dht_esp32"  # InfluxDB bucket name
+INFLUXDB_TOKEN = "lT1cn9zvTE5ZCW85PLYlm5vTJWKzOLAdFgsjXiWdf-f9O8R1wTbw0Uu-cRvbJ-WzCEMOFTWuzsc097Aq6lqZhw=="  # Replace with your InfluxDB token
+INFLUXDB_ORG = "IoT_NTU"      # Replace with your InfluxDB organization name
+INFLUXDB_BUCKET = "Dht_Lab13"  # InfluxDB bucket name
 
 # MQTT setup
-MQTT_BROKER = "192.168.27.64"  # ESP32's MQTT broker address
+MQTT_BROKER = "192.168.43.78"  # ESP32's MQTT broker address
 MQTT_PORT = 1883                # MQTT port
 MQTT_TOPIC_TEMP = "esp32/dht/temp"
 MQTT_TOPIC_HUM = "esp32/dht/hum"
