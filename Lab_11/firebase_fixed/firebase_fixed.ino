@@ -4,7 +4,7 @@
 
 // WiFi Credentials
 const char* ssid = "Shaham";
-const char* password = "abcd1234";
+const char* password = "hadia444";
 
 // Firebase Configuration
 const String FIREBASE_HOST = "lab-11-firebase1-default-rtdb.firebaseio.com";

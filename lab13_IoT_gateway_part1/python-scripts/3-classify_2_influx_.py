@@ -13,7 +13,7 @@ INFLUXDB_ORG = "IoT_NTU"      # Replace with your InfluxDB organization name
 INFLUXDB_BUCKET = "Dht_Lab13"  # InfluxDB bucket name
 
 # MQTT setup
-MQTT_BROKER = "192.168.43.78"  # ESP32's MQTT broker address
+MQTT_BROKER = "192.168.128.78"  # ESP32's MQTT broker address
 MQTT_PORT = 1883                # MQTT port
 MQTT_TOPIC_TEMP = "esp32/dht/temp"
 MQTT_TOPIC_HUM = "esp32/dht/hum"
